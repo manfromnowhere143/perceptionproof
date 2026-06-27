@@ -1,56 +1,54 @@
-"""The PerceptionBackend interface (docs/ARCHITECTURE.md sec 2) and the open,
-deterministic LocalBackend. The Aweb/Maestro backend lives in the proprietary
-aweb repo and implements the same Protocol.
+"""The PerceptionBackend interface and the open, deterministic LocalBackend.
 
-The open science (signals, scoring) depends ONLY on this interface, so an outside
-engineer reproduces every figure with LocalBackend and zero Aweb access.
+LocalBackend is the production-shaped backend: it composes a DatasetAdapter + a list of
+ModelRunners + a ReceiptSigner. Its wiring is identical to the synthetic path; only the
+adapter and runners differ. With real adapters/runners it runs the real study; with
+fixtures it is fully tested offline (no data, no GPU). The Aweb/Maestro backend
+implements the same interface in the proprietary repo (docs/ARCHITECTURE.md sec 2).
 """
 
 from __future__ import annotations
 
 from typing import Protocol
 
-from .types import ModelOutput, Receipt, SceneBundle
-
-
-class ModelLock:
-    """Loaded protocol/models.lock.json — frozen model ids + weight hashes."""
-
-
-class StepRecord:
-    """The payload hashed + signed into a Receipt (run_id, step, inputs, outputs)."""
+from .dataset import DatasetAdapter
+from .models import ModelRunner
+from .receipts import GENESIS_HASH, ReceiptSigner
+from .types import ModelOutput, SceneBundle
 
 
 class PerceptionBackend(Protocol):
     def ingest(self, segment_id: str) -> SceneBundle: ...
-    def run_models(self, scene: SceneBundle, lock: ModelLock) -> list[ModelOutput]: ...
-    def emit_receipt(self, record: StepRecord) -> Receipt: ...
+    def run_models(self, scene: SceneBundle) -> list[ModelOutput]: ...
+    def emit_receipt(self, *, step: str, segment_id: str | None, inputs_hash: str,
+                     outputs_hash: str, extra: dict | None = None) -> dict: ...
 
 
 class LocalBackend:
-    """Deterministic, dependency-light backend for full open reproducibility.
-
-    ingest:      loads a SceneBundle from a user-provided local dataset path (no
-                 redistribution; user accepts dataset license themselves).
-    run_models:  runs the pinned open models, OR replays cached ModelOutput fixtures
-                 so results reproduce byte-for-byte without a GPU.
-    emit_receipt: hash-chains (blake3 run_id, sha256 content) and signs (ed25519)
-                 with a repo-local dev key; chain + signatures publicly verifiable.
-
-    P1 status: interface fixed. ingest/run_models implemented at P2, receipt signing
-    implemented alongside (it is small and self-contained).
-    """
-
-    def __init__(self, run_id: str, signing_key_path: str) -> None:
-        self._run_id = run_id
-        self._signing_key_path = signing_key_path
-        self._prev_hash = "0" * 64  # genesis
+    def __init__(self, run_id: str, adapter: DatasetAdapter,
+                 runners: list[ModelRunner], signer: ReceiptSigner) -> None:
+        self.run_id = run_id
+        self.adapter = adapter
+        self.runners = list(runners)
+        self.signer = signer
+        self._prev = GENESIS_HASH
 
     def ingest(self, segment_id: str) -> SceneBundle:
-        raise NotImplementedError("P2")
+        return self.adapter.load(segment_id)
 
-    def run_models(self, scene: SceneBundle, lock: ModelLock) -> list[ModelOutput]:
-        raise NotImplementedError("P2")
+    def run_models(self, scene: SceneBundle) -> list[ModelOutput]:
+        return [r.predict(scene) for r in self.runners]
 
-    def emit_receipt(self, record: StepRecord) -> Receipt:
-        raise NotImplementedError("P2")
+    def emit_receipt(self, *, step: str, segment_id: str | None, inputs_hash: str,
+                     outputs_hash: str, extra: dict | None = None) -> dict:
+        rec = self.signer.sign_step(
+            run_id=self.run_id,
+            step=step,
+            segment_id=segment_id,
+            inputs_hash=inputs_hash,
+            outputs_hash=outputs_hash,
+            prev_receipt_hash=self._prev,
+            extra=extra or {},
+        )
+        self._prev = rec["content_hash"]
+        return rec

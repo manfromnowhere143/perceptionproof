@@ -31,11 +31,21 @@ A null on all three is a real, reported finding. The integrity is the product. S
 
 ## How it works
 
-```
-scene.ingest → perception.run (N models) → signal.compute → score.correlate → signed receipt
+```mermaid
+flowchart LR
+  D[("DatasetAdapter<br/>WOD-E2E · NAVSIM · fixture")] --> I[scene.ingest]
+  I --> P["perception.run<br/>N model runners"]
+  P --> S["signal.compute<br/>S1 disagreement · S2 temporal<br/>S3 occupancy · S4 semantic-entropy"]
+  S --> C["score.correlate<br/>ρ+CI · AUROC/AP · AURC<br/>Kendall-inversion · MI · BH-FDR"]
+  C --> R[["signed receipt chain<br/>(Ed25519, verifiable)"]]
+  P -. each step .-> R
+  C --> O[/"reproducible report<br/>vs RFS / PDMS"/]
 ```
 
-The science (signals, metrics, statistics) is open and backend-agnostic. Orchestration runs on either a deterministic local backend (zero external deps, full reproducibility) or Aweb's governed Maestro backend (production, signed receipts). See `docs/ARCHITECTURE.md`.
+The science (signals, metrics, statistics) is open and backend-agnostic. The same pipeline
+runs over a deterministic local backend (zero external deps, full reproducibility) or a
+governed production backend (signed receipts) by swapping the `DatasetAdapter` and model
+runners — nothing downstream changes. See `docs/ARCHITECTURE.md`.
 
 ## Reproduce
 

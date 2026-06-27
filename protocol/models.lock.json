@@ -1,28 +1,18 @@
 {
-  "_comment": "Frozen at P2 BEFORE any result. Each model pinned by id + weight SHA-256. M >= 3 spanning paradigms (E2E planner, occupancy/BEV, VLA). Until P2 these are placeholders.",
-  "schema_version": 1,
+  "_comment": "Frozen at P2 BEFORE any result. Each chosen model is pinned by id + source + weight SHA-256 (filled on download). Candidates below span the paradigms; the exact M>=3 used per track are promoted into 'frozen_models' and hashed before any run.",
+  "schema_version": 2,
   "frozen": false,
-  "models": [
-    {
-      "id": "TBD-e2e-planner",
-      "paradigm": "end-to-end-planner",
-      "source": "TBD@P2",
-      "weights_sha256": "TBD@P2",
-      "output": ["trajectory"]
-    },
-    {
-      "id": "TBD-occupancy",
-      "paradigm": "occupancy-bev",
-      "source": "TBD@P2",
-      "weights_sha256": "TBD@P2",
-      "output": ["occupancy_field"]
-    },
-    {
-      "id": "TBD-vla",
-      "paradigm": "vision-language-action",
-      "source": "TBD@P2",
-      "weights_sha256": "TBD@P2",
-      "output": ["trajectory", "reasoning_rollouts"]
-    }
-  ]
+  "candidates": {
+    "navsim_ensemble": [
+      {"id": "navsim:transfuser", "paradigm": "e2e-planner-sensor", "source": "github.com/autonomousvision/navsim", "weights_sha256": "TBD@download", "output": ["trajectory"]},
+      {"id": "navsim:ego_status_mlp", "paradigm": "e2e-planner-egostatus", "source": "github.com/autonomousvision/navsim", "weights_sha256": "TBD@download", "output": ["trajectory"]},
+      {"id": "navsim:constant_velocity", "paradigm": "baseline", "source": "github.com/autonomousvision/navsim", "weights_sha256": "n/a-analytic", "output": ["trajectory"]}
+    ],
+    "wod_e2e": [
+      {"id": "e2e:planner-tbd", "paradigm": "camera-e2e-planner", "source": "TBD@P2", "weights_sha256": "TBD@download", "output": ["trajectory", "occupancy"]},
+      {"id": "occ:surroundocc-or-fbocc", "paradigm": "occupancy-bev", "source": "TBD@P2", "weights_sha256": "TBD@download", "output": ["occupancy_field"]},
+      {"id": "vla:autovla", "paradigm": "vision-language-action", "source": "github.com (AutoVLA, Qwen2.5-VL-3B backbone)", "weights_sha256": "TBD@download", "output": ["trajectory", "reasoning_rollouts"]}
+    ]
+  },
+  "frozen_models": []
 }
