@@ -77,10 +77,12 @@ def main():
             fut = np.asarray(scene.get_future_trajectory(NUM_POSES).poses, dtype=np.float32)
             if fut.shape[0] < NUM_POSES:
                 continue
-            Xtr.append(x); Ytr.append(fut[:NUM_POSES].reshape(-1))
+            Xtr.append(x)
+            Ytr.append(fut[:NUM_POSES].reshape(-1))
         except Exception:
             continue
-    Xtr = torch.tensor(np.stack(Xtr)); Ytr = torch.tensor(np.stack(Ytr))
+    Xtr = torch.tensor(np.stack(Xtr))
+    Ytr = torch.tensor(np.stack(Ytr))
     print(f"[pdms] train scenes: {len(Xtr)}", flush=True)
 
     agents = []
@@ -89,7 +91,10 @@ def main():
         mlp = native_mlp()
         opt = torch.optim.Adam(mlp.parameters(), lr=1e-3)
         for _ in range(EPOCHS):
-            opt.zero_grad(); loss = ((mlp(Xtr) - Ytr) ** 2).mean(); loss.backward(); opt.step()
+            opt.zero_grad()
+            loss = ((mlp(Xtr) - Ytr) ** 2).mean()
+            loss.backward()
+            opt.step()
         a = EgoStatusMLPAgent(hidden_layer_dim=H, lr=1e-3,
                               trajectory_sampling=TrajectorySampling(time_horizon=4, interval_length=0.5))
         a._mlp.load_state_dict(mlp.state_dict())
