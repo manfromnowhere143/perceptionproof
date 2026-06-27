@@ -12,12 +12,25 @@ PerceptionProof is a reproducible study and harness that tests exactly that ques
 - The current substitute is human raters: Waymo's Rater Feedback Score on long-tail segments (WOD-E2E, arXiv 2510.26125).
 - We test whether label-free signals — model disagreement, temporal inconsistency, occupancy conflict, VLA reasoning self-consistency — recover the human-judged ranking cheaply.
 
-Full grounding and verification grades: see the companion thesis (Aweb internal) and `docs/MATHEMATICS.md`.
+Full grounding and verification grades: `docs/MATHEMATICS.md`.
 
 ## What is and isn't novel (stated honestly)
 
 - **Not novel:** disagreement-as-uncertainty (Deep Ensembles, 2017). We do not claim it.
 - **The contribution:** (1) bridging cheap label-free signals to the 2026 metric-validity crisis on the long tail; (2) a falsifiable, multi-signal study under one rigorous protocol; (3) auditable, signed provenance for the whole evaluation. Publishable even if the result is negative.
+
+## Results to date
+
+Measured on **real** NAVSIM scenes (OpenScene/nuPlan), scored by the unit-tested statistics in this repo. Each result links to its reproduction and its caveats.
+
+| Test | Outcome | Result | Status |
+|---|---|---|---|
+| Disagreement vs open-loop error | ADE vs human future | Spearman ρ = **0.699** [0.599, 0.750], AUROC 0.855 | done — [report](results/navsim_p2a_report.md) |
+| Independent outcome (leave-one-out) | error of a *held-out* model | ρ = **0.683** [0.589, 0.729] | done — retires the coupling caveat |
+| Disagreement vs **closed-loop** PDMS | PDM simulator score | — | in progress |
+| Disagreement vs **human** RFS (WOD-E2E) | rater feedback | — | planned |
+
+Honest reading: the open-loop result is the first rung — it proves the pipeline runs on real frames and the signal tracks genuine scene difficulty (the leave-one-out test removes the algebraic-coupling concern). It is **not** yet a closed-loop or human-rated claim. The repo states that plainly; the next two rows are the decisive tests.
 
 ## Pre-registered hypotheses
 
@@ -49,16 +62,20 @@ runners — nothing downstream changes. See `docs/ARCHITECTURE.md`.
 
 ## Reproduce
 
+The synthetic end-to-end run (no data, no GPU) exercises the whole machine and verifies the receipt chain:
+
 ```bash
-# (target interface — implemented across phases P2–P5)
-pip install -e .
-perceptionproof run --backend local --slice protocol/slices.json --out results/
-perceptionproof verify results/receipts/   # checks hash chain + signatures
+pip install -e ".[dev]"
+pytest                                                     # signals, statistics, receipts
+python -m harness.cli run --backend synthetic              # full mission -> results/ + receipts
+python -m harness.cli verify results/synthetic_receipts.jsonl   # -> VERIFIED
 ```
+
+The real NAVSIM result is reproduced under [`experiments/navsim_p2a/`](experiments/navsim_p2a/) (setup, data, train, analyze).
 
 ## Status
 
-Phase **P1 — scaffold**. Hypotheses frozen, mathematics and architecture specified, capability contracts defined. Datasets and models not yet wired. Build cadence is deliberate: no phase advances until its gate is objectively met. See `docs/CONTINUITY.md`.
+Signals (S1–S4), validity statistics, and the tamper-evident receipt chain are implemented and unit-tested. The pipeline has produced a real open-loop result on NAVSIM; the closed-loop (PDMS) and human-rated (RFS) tests are the active work. Build cadence is deliberate — no phase advances until its gate is objectively met, and negative results are published. See `docs/CONTINUITY.md`.
 
 ## Data & licensing
 
@@ -68,11 +85,12 @@ Code: Apache-2.0 (`LICENSE`). Datasets (WOD-E2E, NAVSIM/nuPlan) are non-commerci
 
 ```
 docs/MATHEMATICS.md     every signal and validity metric, formalized
-docs/ARCHITECTURE.md    Maestro-native, receipt-backed system design
-docs/CONTINUITY.md      process, outcomes, and exact resume point for future sessions
+docs/ARCHITECTURE.md    backend interface, receipts, mission DAG
+docs/CONTINUITY.md      status, outcomes, and exact resume point
 PREREGISTRATION.md      frozen hypotheses, thresholds, slice, seed
-protocol/               pinned models (hashed) and segment ids
-signals/                S1–S4 reference implementations
-harness/                the runner + receipt verifier
-results/                reproducible reports + signed receipts
+perceptionproof/        signals (S1–S4), statistics, receipts, backends
+harness/                runner + CLI + receipt verifier
+experiments/            real-data experiments (NAVSIM) + reproduction
+results/                reports and signed receipts
+protocol/               pinned models and slice ids
 ```
