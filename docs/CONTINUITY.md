@@ -71,6 +71,11 @@ scientific finding.
 Gate to leave P2: a clean run produces receipted `ModelOutput` for the slice, and
 re-running yields the same `run_id` and byte-identical outputs.
 
+## Published
+
+Public repository: https://github.com/manfromnowhere143/perceptionproof (Apache-2.0).
+CI (ruff + pytest) runs on every push and pull request.
+
 ## Log
 
 - **2026-06-27** — P0/P1 complete (thesis, math, architecture, pre-registration). CPU core
