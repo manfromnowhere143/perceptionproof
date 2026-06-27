@@ -78,8 +78,20 @@ the real numbers are computed with CIs, the chain verifies, and re-running is by
 Public repository: https://github.com/manfromnowhere143/perceptionproof (Apache-2.0).
 CI (ruff + pytest) runs on every push and pull request.
 
+## First real measurement (P2a)
+
+On 788 held-out real NAVSIM scenes (disjoint by-log split, 4-member ego-status MLP ensemble,
+CPU on GCP), label-free disagreement predicts open-loop error: Spearman ρ=0.699 [0.599, 0.750],
+p=0.0005; failure-mining AUROC=0.855 / AP=0.846 (prec@50=0.98); E-AURC=0.180. Full writeup +
+honest caveats (open-loop not closed-loop; weak ego-status models; structural coupling; own split
+not official navtest): `results/navsim_p2a_report.md`. Next decisive test = P2b (NAVSIM PDMS) and
+WOD-E2E RFS. VM bootstrap scripts: scratchpad (vm_setup.sh, vm_data.sh, pp_experiment.py).
+
 ## Log
 
+- **2026-06-28** — P2a: first REAL number on real NAVSIM data (ρ=0.70, AUROC=0.855). NAVSIM env +
+  minimal data (maps + trainval logs, no sensors) stood up on GCP CPU VM engineering-node-02;
+  4-member ego-status MLP ensemble trained; disagreement-vs-ADE scored by the tested code.
 - **2026-06-27** — P0/P1 complete (thesis, math, architecture, pre-registration). CPU core
   built and green: receipts, all four signals, all validity statistics, and a synthetic
   end-to-end harness + CLI that runs the mission and verifies the receipt chain (31 tests).
