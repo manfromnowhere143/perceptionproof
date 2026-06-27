@@ -37,7 +37,9 @@ commercial half — open-core).
 | P1 Scaffold | hypotheses frozen pre-result | DONE — repo skeleton, math, architecture, pre-registration |
 | P2 Data & models | inputs reproducible from receipts | IN PROGRESS — production `LocalBackend` + `DatasetAdapter`/`ModelRunner` seam BUILT + tested on fixtures; real WOD-E2E/NAVSIM adapters + model runners remain (GPU/dataset-bound). Runbook: `docs/P2_SETUP.md` |
 | P3 Signals | tests green; deterministic | DONE — all four signals implemented + tested on known-answer inputs (S1 MMD disagreement, S2 SE(2)-aligned temporal flicker, S3 corridor occupancy-conflict, S4 semantic-entropy clustering) |
-| P4 Study | each finding adversarially verified | core DONE — all validity statistics implemented + tested; awaits real RFS labels |
+| P4 Study | each finding adversarially verified | core DONE — all validity statistics implemented + tested |
+| P2a real (open-loop) | real frames, receipted | DONE — NAVSIM ensemble, ρ=0.699; leave-one-out independent outcome ρ=0.683 (retires coupling caveat). `results/navsim_p2a_report.md`, `experiments/navsim_p2a/` |
+| P2b closed-loop (PDMS) | independent closed-loop score | SCOPED, not done — metric-cache pipeline runs but needs (1) data relocated to `navsim_logs/<split>/` layout, (2) NATIVE EgoStatusMLP agents trained via NAVSIM Hydra (custom MLP ckpts not loadable by the scorer), then `pdm_score(metric_cache, trajectory)`. API: `MetricCacheProcessor.compute_metric_cache` + `navsim...pdm_score`. WOD-E2E RFS still needs the Waymo license download |
 | P5 Report & repo | reproduce-in-one-command verified | pending |
 
 ## What runs today (CPU, no GPU/dataset)
