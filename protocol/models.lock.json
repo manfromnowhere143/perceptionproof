@@ -1,0 +1,28 @@
+{
+  "_comment": "Frozen at P2 BEFORE any result. Each model pinned by id + weight SHA-256. M >= 3 spanning paradigms (E2E planner, occupancy/BEV, VLA). Until P2 these are placeholders.",
+  "schema_version": 1,
+  "frozen": false,
+  "models": [
+    {
+      "id": "TBD-e2e-planner",
+      "paradigm": "end-to-end-planner",
+      "source": "TBD@P2",
+      "weights_sha256": "TBD@P2",
+      "output": ["trajectory"]
+    },
+    {
+      "id": "TBD-occupancy",
+      "paradigm": "occupancy-bev",
+      "source": "TBD@P2",
+      "weights_sha256": "TBD@P2",
+      "output": ["occupancy_field"]
+    },
+    {
+      "id": "TBD-vla",
+      "paradigm": "vision-language-action",
+      "source": "TBD@P2",
+      "weights_sha256": "TBD@P2",
+      "output": ["trajectory", "reasoning_rollouts"]
+    }
+  ]
+}

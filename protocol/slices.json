@@ -1,0 +1,9 @@
+{
+  "_comment": "Exact segment ids evaluated. Frozen at P2. No frame data — ids only (see DATA_LICENSES.md).",
+  "schema_version": 1,
+  "frozen": false,
+  "dataset": "wod-e2e",
+  "selection_rule": "long-tail segments with RFS labels; occurrence frequency < 0.03% per WOD-E2E",
+  "n": "TBD@P2",
+  "segment_ids": []
+}

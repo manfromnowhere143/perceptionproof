@@ -1,0 +1,32 @@
+# Never commit dataset media or labels (see DATA_LICENSES.md)
+data/
+datasets/
+*.tfrecord
+*.bag
+*.pcd
+*.bin
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.parquet
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+dist/
+build/
+
+# Receipts signing — never commit private keys
+*.key
+secrets/
+
+# Keep derived results + receipts tracked (they are the reproducible artifact)
+!results/
+!results/**

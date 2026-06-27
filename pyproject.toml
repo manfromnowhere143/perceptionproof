@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "perceptionproof"
+version = "0.1.0"
+description = "Reproducible study + harness: do cheap label-free signals predict human-rated long-tail driving failure where open-loop metrics fail?"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Aweb" }]
+keywords = ["autonomous-driving", "uncertainty", "evaluation", "selective-prediction", "long-tail"]
+
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.12",        # spearman/kendall, bootstrap, fisher-z power
+  "scikit-learn>=1.4",  # logistic fusion, GroupKFold, calibration, AP/AUROC
+  "pydantic>=2.6",      # typed SceneBundle / ModelOutput / Receipt schemas
+  "pynacl>=1.5",        # ed25519 receipt signatures
+]
+# Content-addressed run_id and content hashes use the standard library (hashlib
+# sha256 / blake2b) — no third-party hashing dependency.
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.4", "mypy>=1.10"]
+
+[project.scripts]
+perceptionproof = "harness.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.hatch.build.targets.wheel]
+packages = ["perceptionproof", "harness"]
