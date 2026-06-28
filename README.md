@@ -76,7 +76,7 @@ The real NAVSIM result is reproduced under [`experiments/navsim_p2a/`](experimen
 
 ## Status
 
-Signals (S1–S4), validity statistics, and the tamper-evident receipt chain are implemented and unit-tested. The pipeline has produced a real open-loop result on NAVSIM; the closed-loop (PDMS) and human-rated (RFS) tests are the active work. Build cadence is deliberate — no phase advances until its gate is objectively met, and negative results are published. See `docs/CONTINUITY.md`.
+Signals (S1–S4), validity statistics, and the tamper-evident receipt chain are implemented and unit-tested. On real NAVSIM scenes the pipeline has produced the full arc above (P2a–P2c): open-loop predictable, closed-loop *score* not, closed-loop *gate events* yes. The real-sensor extension — TransFuser, a 3-seed SOTA camera+LiDAR planner — has its inference + PDM-scoring pipeline validated end-to-end, but is currently **blocked on a NAVSIM metadata/sensor frame-version inconsistency** (the scene metadata we have does not frame-align with the navtrain sensor blobs); see `docs/CONTINUITY.md`. The human-rated RFS test is planned. Build cadence is deliberate — no phase advances until its gate is objectively met, and negative results are published.
 
 ## Data & licensing
 
