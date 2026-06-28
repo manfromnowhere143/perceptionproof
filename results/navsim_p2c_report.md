@@ -69,12 +69,20 @@ baseline on those gates?
 Open-loop predictability does not transfer to the closed-loop *score*, but label-free signals do
 predict closed-loop *failure events* when the target is the binary safety gates directly.
 
+## Robustness: leave-one-out NC (coupling removed)
+
+The deployed planner (member 0, whose NC gate is the outcome) is also inside the disagreement
+ensemble — a potential coupling. Removing it: disagreement among the **other** members {1,2,3}
+predicts member 0's collision at **AUROC 0.821 [0.775, 0.865]**, essentially identical to the
+coupled 0.829 and with the CI excluding chance. So the disagreement→collision signal is genuine
+scene difficulty, not an algebraic artifact. Reproduce: `experiments/navsim_p2c/leave_one_out_nc.py`.
+
 ## Honest caveats
 
 1. **Weak deployed planner** (ego-status MLP; its failures are partly non-collision gates like
-   driving-direction), which both bounds and explains the any-gate noise.
-2. **Single split / dataset**; the deployed planner is also a member of the disagreement ensemble
-   (slight coupling on NC — the P2a leave-one-out logic would remove it; not yet applied here).
+   driving-direction), which both bounds and explains the any-gate noise. A real sensor planner
+   (TransFuser) whose failures are genuine collisions is the natural P2d step.
+2. ~~Deployed-planner-in-ensemble coupling~~ — ADDRESSED by the leave-one-out test above.
 3. **Power**: 51 collision / 94 off-road events across 55 drives give clear above-chance verdicts
    but leave the *signal-superiority* test underpowered (Δ≈0.04–0.06).
 
