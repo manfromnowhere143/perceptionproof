@@ -39,7 +39,8 @@ commercial half — open-core).
 | P3 Signals | tests green; deterministic | DONE — all four signals implemented + tested on known-answer inputs (S1 MMD disagreement, S2 SE(2)-aligned temporal flicker, S3 corridor occupancy-conflict, S4 semantic-entropy clustering) |
 | P4 Study | each finding adversarially verified | core DONE — all validity statistics implemented + tested |
 | P2a real (open-loop) | real frames, receipted | DONE — NAVSIM ensemble, ρ=0.699; leave-one-out independent outcome ρ=0.683 (retires coupling caveat). `results/navsim_p2a_report.md`, `experiments/navsim_p2a/` |
-| P2b closed-loop (PDMS) | independent closed-loop score | SCOPED, not done — metric-cache pipeline runs but needs (1) data relocated to `navsim_logs/<split>/` layout, (2) NATIVE EgoStatusMLP agents trained via NAVSIM Hydra (custom MLP ckpts not loadable by the scorer), then `pdm_score(metric_cache, trajectory)`. API: `MetricCacheProcessor.compute_metric_cache` + `navsim...pdm_score`. WOD-E2E RFS still needs the Waymo license download |
+| P2b closed-loop (PDMS) | independent closed-loop score | DONE — NULL result: disagreement (S1) does NOT transfer to PDMS (ρ=−0.074 [−0.396,0.285], AUROC≈0.53, 400 scenes/8 drives) while open-loop ρ=0.70. On-thesis (reproduces the open-loop↔closed-loop gap). Pre-registered null, published. `results/navsim_p2b_report.md`, `experiments/navsim_p2b/`. Pipeline solved: symlink data→`navsim_logs/<split>/`, metric-cache via run_metric_caching, score via `navsim.evaluate.pdm_score` with native-arch ensemble (weights assigned into EgoStatusMLPAgent._mlp) |
+| P2c next | signal diversity + stronger planner | S3 occupancy-conflict (collision-risk signal) is the natural closed-loop test; + WOD-E2E RFS (needs Waymo license download) |
 | P5 Report & repo | reproduce-in-one-command verified | pending |
 
 ## What runs today (CPU, no GPU/dataset)
