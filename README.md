@@ -27,10 +27,11 @@ Measured on **real** NAVSIM scenes (OpenScene/nuPlan), scored by the unit-tested
 |---|---|---|---|
 | Disagreement vs open-loop error | ADE vs human future | Spearman ρ = **0.699** [0.599, 0.750], AUROC 0.855 | done — [report](results/navsim_p2a_report.md) |
 | Independent outcome (leave-one-out) | error of a *held-out* model | ρ = **0.683** [0.589, 0.729] | done — retires the coupling caveat |
-| Disagreement vs **closed-loop** PDMS | PDM simulator score | ρ = **−0.074** [−0.396, 0.285] — no transfer | done — [report](results/navsim_p2b_report.md) |
-| Disagreement vs **human** RFS (WOD-E2E) | rater feedback | — | planned |
+| Disagreement vs closed-loop PDMS **score** | PDM simulator score | ρ = **−0.074** [−0.396, 0.285] — no transfer | done — [report](results/navsim_p2b_report.md) |
+| Label-free signals vs PDMS **gate events** | binary NC (collision) / DAC (off-road) | **AUROC 0.77–0.83** (CIs exclude chance, 55 drives); collision-geometry vs disagreement inconclusive | done — [report](results/navsim_p2c_report.md) |
+| Label-free signals vs **human** RFS (WOD-E2E) | rater feedback | — | planned |
 
-Honest reading: the S1 signal strongly predicts **open-loop** error (and the leave-one-out test shows that is genuine scene difficulty, not an artifact) — but it does **not** transfer to the **closed-loop** PDM score (ρ ≈ 0, AUROC ≈ chance). That is a real, pre-registered null, and it is *on-thesis*: our own cheap signal reproduced the open-loop↔closed-loop gap that motivates the project. The honest next steps are signal diversity (occupancy-conflict S3, designed for collision risk) and a stronger deployed planner — not a louder claim about S1.
+Honest reading — the arc resolves cleanly: a label-free signal predicts **open-loop** error (P2a, ρ = 0.70), does **not** transfer to the closed-loop PDMS **score** (P2b, ρ ≈ 0 — reproducing the open-loop↔closed-loop gap), **but does** predict the closed-loop **failure events** — the binary collision/off-road gates — at AUROC ~0.8 (P2c), once the target is reframed from the smooth score to the gates the score is built on. A second, honest null: no single signal (collision-geometry vs disagreement) decisively wins on its matched gate — the *reframing* matters more than the *signal*. Caveats (weak ego-status planner; single split): see the P2c report.
 
 ## Pre-registered hypotheses
 
