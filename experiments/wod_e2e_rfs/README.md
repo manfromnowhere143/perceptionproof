@@ -31,12 +31,21 @@ WOD-E2E is a non-commercial research-licensed dataset (Waymo). This directory
 redistributes none of it — only segment-level derived scalars. See
 [`../../DATA_LICENSES.md`](../../DATA_LICENSES.md).
 
+## Files (P2g)
+
+| File | Role |
+|---|---|
+| `run_rfs_surround.py` | Parse + embed all 8 cameras (batched DINOv2), build the ego/front/surround ladder, cache embeddings to `wod_surround_emb.npz`, score RFS for one instantiation. |
+| `stability_study.py` | Re-train each rung over 20 seed-sets off the cache (paired) — pin BLAS threads to 1. |
+| `analyze_surround.py` | Single-instantiation cluster CIs + the stability distribution/verdict. |
+
 ## Headline
 
-479 rater frames / 93 drives. **P2e:** ego-only disagreement predicts worse human RFS at
-ρ = 0.151 [0.063, 0.237] — real (BH q<0.05) but **below the 0.3 bar** (H1 not met); the
-oracle ADE anchor reaches ρ = 0.40, so RFS *is* predictable. **P2f:** adding a frozen
-DINOv2 front-camera embedding **more than doubles** the correlation to ρ = 0.223
-[0.126, 0.315], and a **paired** test puts the improvement at Δρ = +0.122 [+0.003, +0.242]
-vs ego — decisive (CI excludes 0). Perception grounding measurably helps; still under 0.3
-with a single frozen camera (a lower bound). Full multi-camera + LiDAR is the next lever.
+479 rater frames / 93 drives. **P2e:** ego-only disagreement predicts human RFS at
+ρ ≈ 0.18 (mean over seed-sets) — real but **below the 0.3 bar** (H1 not met); oracle ADE
+anchor ρ = 0.40, so RFS *is* predictable. **P2f → P2g (correction):** a single instantiation
+suggested a front-camera DINOv2 lift (0.10→0.22), but a **20-seed-set stability study**
+shows it was seed-noise — mean ρ ego 0.18 / front 0.16 / surround 0.12, every paired
+interval straddles zero, point estimates favor ego (P(vision>ego) ≈ 0.10–0.30). **Frozen-
+encoder perception grounding does not robustly help.** A jointly-trained end-to-end
+vision/LiDAR planner (GPU) is not ruled out and is the honest next lever.

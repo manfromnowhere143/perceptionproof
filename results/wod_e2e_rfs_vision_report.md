@@ -1,4 +1,13 @@
-# P2f — perception grounding: scene-aware disagreement predicts human RFS significantly better
+> **CORRECTION (2026-06-29, see [P2g](wod_e2e_rfs_surround_report.md)):** the headline
+> claim below — that perception grounding *significantly* beats ego (paired Δρ = +0.122,
+> 95% CI [+0.003, +0.242]) — **does not replicate and is retracted.** It was a single
+> high-variance instantiation whose CI cleared zero by only +0.003. A 20-seed-set stability
+> study (P2g) shows the rungs overlap and the point estimates favor ego (P(vision>ego) ≈
+> 0.30). The robust result is **no improvement from frozen-encoder perception grounding**;
+> the human-RFS correlation from label-free disagreement is ρ ≈ 0.18, below the 0.30 bar.
+> This file is kept for the record, not as a finding.
+
+# P2f — perception grounding (PRELIMINARY, superseded by P2g): a single instantiation suggested a lift
 
 Date: 2026-06-29. Compute: GCP n2-standard-16, CPU. Data: WOD-E2E validation split,
 same 479 rater-labeled frames as P2e. Scored by Waymo's official
