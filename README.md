@@ -34,6 +34,29 @@ Measured on **real** NAVSIM scenes (OpenScene/nuPlan), scored by the unit-tested
 
 Honest reading — the arc resolves cleanly: a label-free signal predicts **open-loop** error (P2a, ρ = 0.70), does **not** transfer to the closed-loop PDMS **score** (P2b, ρ ≈ 0 — reproducing the open-loop↔closed-loop gap), **but does** predict the closed-loop **failure events** — the binary collision/off-road gates — at AUROC ~0.8 (P2c), once the target is reframed from the smooth score to the gates the score is built on. A second, honest null: no single signal (collision-geometry vs disagreement) decisively wins on its matched gate — the *reframing* matters more than the *signal*. Against the actual **human raters** (WOD-E2E RFS, P2e) the same cheap signal is **real but weak** — ρ = 0.15 (CI excludes 0, BH q < 0.05) yet **below the pre-registered 0.3 bar, so H1 is not met**; an oracle anchor (ADE, which needs the human label) reaches ρ = 0.40, so RFS *is* predictable — an ego-status-only ensemble simply carries too little scene information, and a perception-grounded ensemble is the honest next lever. Caveats (weak ego-status planner; single split): see the P2c / P2e reports.
 
+The same label-free signal, carried across four targets of increasing realism — strong on
+the cheap proxy, null on the smooth closed-loop score, decisive on the binary safety gates,
+weak against human judgment with an ego-only planner:
+
+```mermaid
+flowchart LR
+  SIG["label-free signal<br/>ensemble disagreement<br/>(no labels, no sensors)"]
+  SIG --> A["open-loop ADE<br/><b>ρ = 0.70</b><br/>strong"]
+  SIG --> B["closed-loop PDMS <i>score</i><br/><b>ρ ≈ 0</b><br/>null — the known gap"]
+  SIG --> C["closed-loop <i>gate events</i><br/>collision · off-road<br/><b>AUROC ≈ 0.8</b><br/>decisive"]
+  SIG --> E["human RFS · WOD-E2E<br/><b>ρ = 0.15</b><br/>real but below the 0.3 bar"]
+  classDef strong fill:#e2f3e5,stroke:#2e7d32,color:#13361b;
+  classDef null fill:#fdebec,stroke:#c62828,color:#3b1213;
+  classDef win fill:#e4f0ff,stroke:#1565c0,color:#0c2742;
+  class A strong;
+  class B,E null;
+  class C win;
+```
+
+The intellectual payload is this shape, not any single number: cheap signals track the
+cheap metric, fail the metric the field already knows is broken, and recover the *safety
+events* — which is exactly where an evaluation layer needs to work.
+
 ## Pre-registered hypotheses
 
 | | Claim | Confirmed if |
