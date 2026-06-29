@@ -6,6 +6,8 @@ PerceptionProof is a reproducible study and harness that tests exactly that ques
 
 **The full write-up is the paper: [`docs/PAPER.md`](docs/PAPER.md)** — one label-free signal traced across four targets (open-loop error → closed-loop score → safety gates → human ratings), with pre-registered nulls and an in-line self-correction.
 
+**Phase 2 is underway and pre-registered: [`docs/PHASE2_PROGRAM.md`](docs/PHASE2_PROGRAM.md)** — Phase 1 found label-free signals hit a *ceiling* against human ratings (ρ≈0.18); Phase 2 builds the first **supervised** model of human driving preference (a learned Rater-Feedback-Score predictor / reward model) to break it. Gates frozen before results.
+
 ---
 
 ## The premise (verified, not marketing)
