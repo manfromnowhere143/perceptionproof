@@ -44,7 +44,8 @@ commercial half — open-core).
 | P2d.1 leave-one-out NC | remove coupling | DONE — disagreement{1,2,3} predicts held-out member-0 collision at AUROC 0.821 [0.775,0.865] (~ coupled 0.829) → not an artifact. `experiments/navsim_p2c/leave_one_out_nc.py` |
 | P2d.2 TransFuser (real sensor planner) | real collisions | BLOCKED on data consistency. Pipeline VALIDATED end-to-end (3 pretrained TransFuser ckpts load, metric-cache + sensor-loader + pdm_score all execute). 446 GB navtrain sensors downloaded. BUT all scenes fail FileNotFoundError on specific CAM_F0 frames: our `openscene_metadata_trainval` (1310 logs, only 7.2% navtrain coverage) does NOT frame-align with the navtrain sensor blobs — partial/mismatched metadata version. FIX next session: re-download the FULL/correct trainval metadata to match the sensors (Option A), or use the self-consistent `mini` split (Option B). Scripts: scratchpad tf_score.py, gen_navtrain_tokens.py, vm_tf_run.sh. VM engineering-node-02 is n2-standard-16, 727 GB disk |
 | P2d.2b TransFuser on mini | real sensor planner | DONE (pipeline validated, underpowered). 3-seed pretrained TransFuser runs end-to-end on the frame-consistent `mini` split (396 scenes, 47 drives, 0 err). But strong planner → only 3 collisions / 10 off-road → can't measure failure-AUROC; any-gate disagreement 0.60 [0.51,0.70] borderline; all paired tests inconclusive. `results/navsim_p2d_transfuser_report.md`. Mini fix: symlink `navsim_logs/mini`→`mini_navsim_logs/mini` (pkls), data via download_mini (sensor URL has `/openscene_sensor_mini_<kind>/` subdir). For POWER: need larger frame-consistent sensors (full trainval ~TBs, or fix navtrain version mismatch). Scripts: scratchpad vm_mini_data.sh, vm_mini_run.sh, tf_score.py (LOGS_DIR/SENSOR_DIR/METRIC_CACHE env) |
-| P2d.3 next | RFS / power | (1) WOD-E2E RFS (Waymo license, CPU-feasible ego-status); (2) powered real-sensor TransFuser needs full trainval sensors or navtrain version fix |
+| P2e WOD-E2E RFS (human raters) | label-free signal vs Waymo Rater Feedback Score | DONE — H1 NOT MET (published negative). 479 rater frames / 93 drives (all 93 val shards, 243 GB, parsed parallel; 4-seed ego-status MLP ensemble; official `get_rater_feedback_score`). Label-free disagreement vs neg-RFS ρ = +0.151 [0.063, 0.237], BH q<0.05 — real but below the pre-registered 0.30 bar. Oracle anchor ADE (needs the human label) ρ = +0.395 [0.326, 0.458] → RFS *is* predictable; the ego-only ensemble carries too little scene info (disagreement↔ADE only 0.19 here vs 0.70 in P2a). Triage AUROC: disagreement 0.629 / ADE 0.734. `results/wod_e2e_rfs_report.md`, `experiments/wod_e2e_rfs/`. Next power lever = perception-grounded ensemble, not a different statistic |
+| P2d.3 next | powered real-sensor | powered real-sensor TransFuser needs full trainval sensors or navtrain version fix |
 | P5 Report & repo | reproduce-in-one-command verified | pending |
 
 ## What runs today (CPU, no GPU/dataset)
@@ -96,6 +97,12 @@ WOD-E2E RFS. VM bootstrap scripts: scratchpad (vm_setup.sh, vm_data.sh, pp_exper
 
 ## Log
 
+- **2026-06-29** — P2e: human-rated benchmark. All 93 WOD-E2E val shards (243 GB) parsed
+  parallel on the CPU VM; 4-seed ego-status MLP ensemble; 479 rater frames scored with
+  Waymo's official RFS. Label-free disagreement vs RFS ρ = 0.15 (real, BH q<0.05, but
+  below the pre-registered 0.30 bar → H1 not met, published as a negative); oracle ADE
+  anchor ρ = 0.40 confirms RFS is predictable. The cheap signal is strongest on open-loop
+  error and weak against human judgment with an ego-only planner.
 - **2026-06-28** — P2a: first REAL number on real NAVSIM data (ρ=0.70, AUROC=0.855). NAVSIM env +
   minimal data (maps + trainval logs, no sensors) stood up on GCP CPU VM engineering-node-02;
   4-member ego-status MLP ensemble trained; disagreement-vs-ADE scored by the tested code.
