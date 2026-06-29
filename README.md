@@ -30,9 +30,10 @@ Measured on **real** NAVSIM scenes (OpenScene/nuPlan), scored by the unit-tested
 | Disagreement vs closed-loop PDMS **score** | PDM simulator score | ρ = **−0.074** [−0.396, 0.285] — no transfer | done — [report](results/navsim_p2b_report.md) |
 | Label-free signals vs PDMS **gate events** | binary NC (collision) / DAC (off-road) | **AUROC 0.77–0.83** (CIs exclude chance, 55 drives); collision-geometry vs disagreement inconclusive | done — [report](results/navsim_p2c_report.md) |
 | Label-free signals vs **TransFuser** gates (real sensor planner) | NC / DAC / any-gate | pipeline validated (396 scenes, 47 drives, 0 err); **underpowered/inconclusive** — a strong planner rarely fails (3 collisions) | done — [report](results/navsim_p2d_transfuser_report.md) |
-| Label-free signal vs **human** RFS (WOD-E2E) | Waymo Rater Feedback Score | ρ = **+0.151** [0.063, 0.237] (real, BH q<0.05) but **below the 0.3 bar — H1 not met**; oracle ADE anchor ρ = 0.40 | done — [report](results/wod_e2e_rfs_report.md) |
+| Label-free signal vs **human** RFS (WOD-E2E), ego-only | Waymo Rater Feedback Score | ρ = **+0.151** [0.063, 0.237] (real, BH q<0.05) but **below the 0.3 bar — H1 not met**; oracle ADE anchor ρ = 0.40 | done — [report](results/wod_e2e_rfs_report.md) |
+| **Perception-grounded** signal vs human RFS (DINOv2 front-cam) | Waymo Rater Feedback Score | ρ = **+0.223** [0.126, 0.315]; **paired Δρ = +0.122 [+0.003, +0.242] vs ego — decisively better** | done — [report](results/wod_e2e_rfs_vision_report.md) |
 
-Honest reading — the arc resolves cleanly: a label-free signal predicts **open-loop** error (P2a, ρ = 0.70), does **not** transfer to the closed-loop PDMS **score** (P2b, ρ ≈ 0 — reproducing the open-loop↔closed-loop gap), **but does** predict the closed-loop **failure events** — the binary collision/off-road gates — at AUROC ~0.8 (P2c), once the target is reframed from the smooth score to the gates the score is built on. A second, honest null: no single signal (collision-geometry vs disagreement) decisively wins on its matched gate — the *reframing* matters more than the *signal*. Against the actual **human raters** (WOD-E2E RFS, P2e) the same cheap signal is **real but weak** — ρ = 0.15 (CI excludes 0, BH q < 0.05) yet **below the pre-registered 0.3 bar, so H1 is not met**; an oracle anchor (ADE, which needs the human label) reaches ρ = 0.40, so RFS *is* predictable — an ego-status-only ensemble simply carries too little scene information, and a perception-grounded ensemble is the honest next lever. Caveats (weak ego-status planner; single split): see the P2c / P2e reports.
+Honest reading — the arc resolves cleanly: a label-free signal predicts **open-loop** error (P2a, ρ = 0.70), does **not** transfer to the closed-loop PDMS **score** (P2b, ρ ≈ 0 — reproducing the open-loop↔closed-loop gap), **but does** predict the closed-loop **failure events** — the binary collision/off-road gates — at AUROC ~0.8 (P2c), once the target is reframed from the smooth score to the gates the score is built on. A second, honest null: no single signal (collision-geometry vs disagreement) decisively wins on its matched gate — the *reframing* matters more than the *signal*. Against the actual **human raters** (WOD-E2E RFS, P2e) the same cheap signal is **real but weak** — ρ = 0.15 (CI excludes 0, BH q < 0.05) yet **below the pre-registered 0.3 bar, so H1 is not met**; an oracle anchor (ADE, which needs the human label) reaches ρ = 0.40, so RFS *is* predictable — the ego-status-only ensemble simply carries too little scene information. **P2f closes that loop:** giving the ensemble *eyes* — a frozen DINOv2 front-camera embedding — **more than doubles** the human-rating correlation to ρ = 0.22, and a **paired** test (same frames, same statistic, features the only difference) puts the improvement at Δρ = +0.122 with a 95% CI that **excludes zero**. The signal is still under the 0.3 bar, but with a *single frozen camera* — a lower bound — and the slope (more perception → more signal) is now measured, not hypothesized. Caveats (front-cam-only frozen encoder; weak ego planner; single split): see the P2c / P2e / P2f reports.
 
 The same label-free signal, carried across four targets of increasing realism — strong on
 the cheap proxy, null on the smooth closed-loop score, decisive on the binary safety gates,
@@ -44,18 +45,22 @@ flowchart LR
   SIG --> A["open-loop ADE<br/><b>ρ = 0.70</b><br/>strong"]
   SIG --> B["closed-loop PDMS <i>score</i><br/><b>ρ ≈ 0</b><br/>null — the known gap"]
   SIG --> C["closed-loop <i>gate events</i><br/>collision · off-road<br/><b>AUROC ≈ 0.8</b><br/>decisive"]
-  SIG --> E["human RFS · WOD-E2E<br/><b>ρ = 0.15</b><br/>real but below the 0.3 bar"]
+  SIG --> E["human RFS · WOD-E2E<br/>ego-only ensemble<br/><b>ρ = 0.15</b><br/>real but below 0.3"]
+  E -- "+ DINOv2 eyes<br/>(perception grounding)" --> F["human RFS · perception-grounded<br/><b>ρ = 0.22</b><br/>paired Δρ=+0.12, CI excludes 0"]
   classDef strong fill:#e2f3e5,stroke:#2e7d32,color:#13361b;
   classDef null fill:#fdebec,stroke:#c62828,color:#3b1213;
   classDef win fill:#e4f0ff,stroke:#1565c0,color:#0c2742;
+  classDef lift fill:#fff4d6,stroke:#b8860b,color:#3d2c00;
   class A strong;
   class B,E null;
   class C win;
+  class F lift;
 ```
 
 The intellectual payload is this shape, not any single number: cheap signals track the
-cheap metric, fail the metric the field already knows is broken, and recover the *safety
-events* — which is exactly where an evaluation layer needs to work.
+cheap metric, fail the metric the field already knows is broken, recover the *safety
+events* — exactly where an evaluation layer needs to work — and, against human judgment,
+**strengthen measurably the moment the ensemble can see the scene** (the gold lift).
 
 ## Pre-registered hypotheses
 
