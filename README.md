@@ -4,6 +4,8 @@
 
 PerceptionProof is a reproducible study and harness that tests exactly that question, with full tamper-evident provenance. It does not drive a car, replace a perception model, or claim at-scale safety evidence. It attacks the one problem autonomous-driving research openly confesses is unsolved: **evaluation that predicts safety.**
 
+**The full write-up is the paper: [`docs/PAPER.md`](docs/PAPER.md)** — one label-free signal traced across four targets (open-loop error → closed-loop score → safety gates → human ratings), with pre-registered nulls and an in-line self-correction.
+
 ---
 
 ## The premise (verified, not marketing)
