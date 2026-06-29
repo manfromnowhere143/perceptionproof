@@ -2,6 +2,7 @@
   "run_id": "51188418fbcf8ff8ae6b24983172599ffff1b396b577d61c027914185cf4a8fc",
   "n": 60,
   "theta_rfs": 5.0,
+  "note": "SYNTHETIC PLUMBING TEST \u2014 correlation is planted by construction; not a scientific finding.",
   "spearman_g1_vs_negRFS": {
     "rho": 0.9594864969801763,
     "ci_low": 0.9165245989049284,
@@ -21,6 +22,5 @@
   "risk_coverage_g1": {
     "aurc": 2.63630250666507,
     "e_aurc": 0.05289059743821323
-  },
-  "note": "SYNTHETIC PLUMBING TEST \u2014 correlation is planted by construction; not a scientific finding."
+  }
 }
