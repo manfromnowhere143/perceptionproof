@@ -27,8 +27,15 @@ off-road — that the score is built on (AUROC ≈ 0.8). Against human ratings i
 our own, and a GPU-trained end-to-end vision ensemble — the strongest version of the signal —
 reaches only ρ = 0.20 (95% CI upper bound 0.28), failing to clear our pre-registered 0.30
 threshold. The weakness against human ratings is a **ceiling**, not a tuning problem: it does
-not move with perception, camera coverage, or end-to-end training. We report every null and
-the self-correction in full, because the integrity of the evaluation is the contribution.
+not move with perception, camera coverage, or end-to-end training. We then drop the label-free
+constraint and build the first *supervised* model of human driving preference — and hit a second,
+sharper wall: a reference-free RFS predictor *matches* a label-using displacement oracle (0.57 vs
+0.60) but cannot beat it, and a reward-model variant does not lift a planner's RFS, because the
+only abundant supervision *is* the displacement signal while the human-preference structure exists
+on just ~479 public frames (a **fundamental data wall**). Together the two phases form a two-sided
+map: cheap evaluation works for the binary safety events an evaluation layer most needs, and
+provably does not — by ceiling and by data wall — for graded human quality. We report every null
+and the self-correction in full, because the integrity of the evaluation is the contribution.
 
 ---
 
@@ -307,8 +314,32 @@ crossed, but not with the graded, preference-shaped quality a human assigns to a
 **Why this is the useful answer.** The cheap-signal hope was that label-free triage could
 substitute for human raters on the long tail. Our evidence says: not via ensemble disagreement,
 and not because the planner is too weak — the limitation is intrinsic to what the signal
-measures. A learned failure predictor trained *directly* on RFS (supervised, not label-free) is
-the natural alternative, and is outside the cheap-signal framing this paper tests.
+measures. A learned predictor trained *directly* on RFS (supervised, not label-free) is the
+natural alternative — so we built one.
+
+**The supervised sequel — and a second wall (Phase 2).** Dropping the label-free constraint, we
+constructed the first supervised model of human driving preference: a reference-free predictor of
+the Rater Feedback Score from a candidate trajectory's geometry and ego context, scored against
+the official RFS on real planner trajectories, held out by scene (gates pre-registered before
+results). The result is a second null, for a sharper reason. The reference-free predictor
+*matches* a label-using displacement oracle (held-out Spearman 0.573 vs 0.603) but does not beat
+it; adding frozen scene perception does not help (Δ = −0.034, 95% CI [−0.100, +0.036]); and used
+as a reward model it does not lift a planner's RFS (reranked − default = −0.077, 95% CI [−0.266,
++0.112]). The mechanism is a **data wall, and it is fundamental**: the only abundant supervision —
+the recorded human future, present on every frame — *is* the displacement signal, so learning at
+scale only reproduces the displacement oracle; the multimodal, trust-region structure that
+distinguishes human preference *from* displacement exists on just the ~479 rated frames (the test
+set is hidden). Supervised methods therefore cannot learn human-preference-beyond-displacement at
+scale on public data — most likely why no such predictor exists. (`PHASE2_PROGRAM.md`,
+`PHASE2A_FINDINGS.md`.)
+
+**The complete picture.** The two phases bound the problem from both sides. Cheap *label-free*
+signals predict open-loop error and binary safety events but are *capped* against human ratings;
+cheap *supervised* learning is *walled* from the human-preference signal by data scarcity. The
+honest, useful conclusion is a two-sided map: cheap evaluation works for the binary safety events
+an evaluation layer most needs, and provably does not — by ceiling and by data wall — for graded
+human quality, with a mechanism for each. A characterization, not a leaderboard win, and the more
+durable for being true.
 
 ---
 
@@ -360,10 +391,15 @@ strong on open-loop error, null on the smooth closed-loop score, **decisive on t
 closed-loop safety events**, and weak on human ratings — and the human-rating weakness is a
 **ceiling** that does not yield to perception, camera coverage, or GPU-scale end-to-end
 training. Along the way a preliminary positive of ours failed a stability test and was retracted.
-The practical conclusion is specific and, we believe, useful: label-free ensemble disagreement
-is a viable triage signal for closed-loop **safety events**, but not a substitute for human
-raters on fine-grained long-tail **quality**. We publish the nulls, the self-correction, and the
-signed receipts, because for an evaluation method the integrity is the result.
+We then asked whether *supervision* could break the human-rating ceiling, built the first learned
+human-preference (RFS) predictor, and found a second wall — fundamental data scarcity: the only
+abundant label is the displacement signal, so learning at scale cannot recover the human-preference
+structure that lives on a few hundred public frames. The practical conclusion is specific and, we
+believe, useful: cheap evaluation — label-free *or* supervised — is a viable triage signal for
+closed-loop **safety events**, but is not, on public data, a substitute for human raters on
+fine-grained long-tail **quality**; one limit is a ceiling, the other a data wall, and we give the
+mechanism for each. We publish the nulls, the self-correction, and the signed receipts, because for
+an evaluation method the integrity is the result.
 
 ---
 
