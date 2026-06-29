@@ -47,5 +47,9 @@ anchor ρ = 0.40, so RFS *is* predictable. **P2f → P2g (correction):** a singl
 suggested a front-camera DINOv2 lift (0.10→0.22), but a **20-seed-set stability study**
 shows it was seed-noise — mean ρ ego 0.18 / front 0.16 / surround 0.12, every paired
 interval straddles zero, point estimates favor ego (P(vision>ego) ≈ 0.10–0.30). **Frozen-
-encoder perception grounding does not robustly help.** A jointly-trained end-to-end
-vision/LiDAR planner (GPU) is not ruled out and is the honest next lever.
+encoder perception grounding does not robustly help.** **P2h** then ran the jointly-trained
+end-to-end vision ensemble on a GPU (`run_parse_pixels.py` → `train_vision.py` →
+`rfs_eval.py` → `analyze_p2h.py`): ρ = 0.202 [0.123, 0.280], a tighter signal and a better
+planner (ADE-vs-RFS 0.46) but **still under 0.30 and overlapping ego** — confirming a genuine
+ceiling on label-free disagreement vs human ratings (ρ ≈ 0.12–0.20) across every
+representation. [P2h report](../../results/wod_e2e_rfs_jointtrained_report.md).
