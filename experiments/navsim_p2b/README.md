@@ -30,7 +30,14 @@ from the ensemble's own trajectories — so a strong **negative** correlation (h
 low PDMS) cannot be the algebraic variance↔mean-error artifact that the P2a leave-one-out test
 already controlled for. It is the closed-loop-aligned evidence the thesis rests on.
 
+## Reproduce from committed data (no dataset needed)
+
+```bash
+python analyze_pdms.py pp_pdms.json    # rho=-0.074 [-0.396,0.285] (the pre-registered null)
+```
+
 ## Honesty / data
 
-No OpenScene/nuPlan media or labels committed — only code. Results are aggregate numbers in
-`results/`. See `../../DATA_LICENSES.md`.
+`pp_pdms.json` holds only **derived** data: segment ids, our ensemble's predicted trajectories,
+and the simulator-computed PDM score per scene. No OpenScene/nuPlan media or labels are
+redistributed. See `../../DATA_LICENSES.md`.

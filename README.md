@@ -31,7 +31,7 @@ Measured on **real** NAVSIM scenes (OpenScene/nuPlan), scored by the unit-tested
 | Independent outcome (leave-one-out) | error of a *held-out* model | ρ = **0.683** [0.589, 0.729] | done — retires the coupling caveat |
 | Disagreement vs closed-loop PDMS **score** | PDM simulator score | ρ = **−0.074** [−0.396, 0.285] — no transfer | done — [report](results/navsim_p2b_report.md) |
 | Label-free signals vs PDMS **gate events** | binary NC (collision) / DAC (off-road) | **AUROC 0.77–0.83** (CIs exclude chance, 55 drives); collision-geometry vs disagreement inconclusive | done — [report](results/navsim_p2c_report.md) |
-| Label-free signals vs **TransFuser** gates (real sensor planner) | NC / DAC / any-gate | pipeline validated (396 scenes, 47 drives, 0 err); **underpowered/inconclusive** — a strong planner rarely fails (3 collisions) | done — [report](results/navsim_p2d_transfuser_report.md) |
+| Label-free signals vs **TransFuser** gates (real sensor planner) | NC / DAC / any-gate | pipeline validated (396 scenes, 52 drives, 0 err); **underpowered/inconclusive** — a strong planner rarely fails (3 collisions, 12 off-road) | done — [report](results/navsim_p2d_transfuser_report.md) |
 | Label-free signal vs **human** RFS (WOD-E2E) | Waymo Rater Feedback Score | ρ ≈ **+0.18** (mean over 20 seed-sets; ego-status), real but **below the 0.3 bar — H1 not met**; oracle ADE anchor ρ = 0.40 | done — [report](results/wod_e2e_rfs_report.md) |
 | **Perception grounding** (frozen DINOv2, front + 8-cam) vs human RFS | does scene perception help? | **No robust effect** — 20-seed-set stability study: P(vision>ego) ≈ 0.10–0.30, paired Δ intervals straddle 0. (A preliminary single draw suggested a lift; it did not replicate.) | done — [report](results/wod_e2e_rfs_surround_report.md) |
 | **Jointly-trained vision ensemble** (GPU, end-to-end) vs human RFS | does a driving-trained planner help? | ρ = **+0.202** [0.123, 0.280] — tighter signal + better planner (ADE-vs-RFS 0.46), but **still under 0.30, overlaps ego.** H1 not met even here | done — [report](results/wod_e2e_rfs_jointtrained_report.md) |
@@ -103,11 +103,28 @@ python -m harness.cli run --backend synthetic              # full mission -> res
 python -m harness.cli verify results/synthetic_receipts.jsonl   # -> VERIFIED
 ```
 
-The real NAVSIM result is reproduced under [`experiments/navsim_p2a/`](experiments/navsim_p2a/) (setup, data, train, analyze).
+**Every headline number regenerates from committed derived data** — no dataset download, no GPU. The scored per-scene outputs (segment ids + trajectories + gate flags + RFS — no frames) are committed next to each analysis, and the unit-tested statistics recompute the reported figures:
+
+```bash
+# NAVSIM arc (P2a open-loop, P2b closed score, P2c safety gates, P2d real-sensor)
+python experiments/navsim_p2a/analyze.py        experiments/navsim_p2a/pp_result.json        # rho=0.699, AUROC 0.855
+python experiments/navsim_p2a/leave_one_out.py  experiments/navsim_p2a/pp_result.json        # rho=0.683 (independent outcome)
+python experiments/navsim_p2b/analyze_pdms.py   experiments/navsim_p2b/pp_pdms.json          # rho=-0.074 (null)
+python experiments/navsim_p2c/analyze.py        experiments/navsim_p2c/pp_p2c_scaled.json    # NC/DAC gates AUROC 0.77-0.83
+python experiments/navsim_p2c/leave_one_out_nc.py experiments/navsim_p2c/pp_p2c_scaled.json  # NC AUROC 0.821
+python experiments/navsim_p2c/analyze.py        experiments/navsim_p2c/tf_mini_result.json   # P2d TransFuser (underpowered)
+
+# WOD-E2E human-rating arc (P2e-P2h)
+python experiments/wod_e2e_rfs/analyze.py          experiments/wod_e2e_rfs/wod_rfs_out.json          # ego-only RFS
+python experiments/wod_e2e_rfs/analyze_surround.py                                                    # P2g stability (corrects P2f)
+python experiments/wod_e2e_rfs/analyze_p2h.py                                                         # jointly-trained vision
+```
+
+Full data-acquisition + scoring pipelines (dataset-bound) are under each `experiments/<name>/` (setup, data, train, score). The committed derived outputs let any reviewer verify the figures offline, against the unit-tested statistics in this repo, with the dataset never leaving its license.
 
 ## Status
 
-Signals (S1–S4), validity statistics, and the tamper-evident receipt chain are implemented and unit-tested. On real NAVSIM scenes the pipeline has produced the full arc above (P2a–P2c): open-loop predictable, closed-loop *score* not, closed-loop *gate events* yes. The real-sensor extension — TransFuser, a 3-seed SOTA camera+LiDAR planner — now **runs end-to-end** (396 scenes, 47 drives, 0 errors) on the frame-consistent `mini` split; on `mini` the signal-vs-gate result is **underpowered/inconclusive** because a strong planner rarely fails (only 3 collisions / 10 off-road), so a powered real-sensor measurement needs a larger consistent dataset ([report](results/navsim_p2d_transfuser_report.md)). The larger navtrain sensors are a separate frame-version mismatch (documented in `docs/CONTINUITY.md`). The human-rated test is now done: on **479 rater-labeled WOD-E2E frames** the cheap label-free signal predicts Waymo's Rater Feedback Score at ρ ≈ 0.18 (mean over 20 seed-sets) — statistically real but below the pre-registered 0.3 bar, so **H1 is reported as not met** ([report](results/wod_e2e_rfs_report.md)). Neither frozen-encoder perception grounding (front + 8-camera DINOv2, [report](results/wod_e2e_rfs_surround_report.md)) nor a **jointly-trained end-to-end vision ensemble** on a GPU (ρ = 0.202 [0.123, 0.280], [report](results/wod_e2e_rfs_jointtrained_report.md)) lifts the human-RFS correlation past 0.30 — it is a genuine ceiling. Build cadence is deliberate — no phase advances until its gate is objectively met, **negative results and self-corrections are published**.
+Signals (S1–S4), validity statistics, and the tamper-evident receipt chain are implemented and unit-tested. On real NAVSIM scenes the pipeline has produced the full arc above (P2a–P2c): open-loop predictable, closed-loop *score* not, closed-loop *gate events* yes. The real-sensor extension — TransFuser, a 3-seed SOTA camera+LiDAR planner — now **runs end-to-end** (396 scenes, 52 drives, 0 errors) on the frame-consistent `mini` split; on `mini` the signal-vs-gate result is **underpowered/inconclusive** because a strong planner rarely fails (only 3 collisions / 12 off-road), so a powered real-sensor measurement needs a larger consistent dataset ([report](results/navsim_p2d_transfuser_report.md)). The larger navtrain sensors are a separate frame-version mismatch (documented in `docs/CONTINUITY.md`). The human-rated test is now done: on **479 rater-labeled WOD-E2E frames** the cheap label-free signal predicts Waymo's Rater Feedback Score at ρ ≈ 0.18 (mean over 20 seed-sets) — statistically real but below the pre-registered 0.3 bar, so **H1 is reported as not met** ([report](results/wod_e2e_rfs_report.md)). Neither frozen-encoder perception grounding (front + 8-camera DINOv2, [report](results/wod_e2e_rfs_surround_report.md)) nor a **jointly-trained end-to-end vision ensemble** on a GPU (ρ = 0.202 [0.123, 0.280], [report](results/wod_e2e_rfs_jointtrained_report.md)) lifts the human-RFS correlation past 0.30 — it is a genuine ceiling. Build cadence is deliberate — no phase advances until its gate is objectively met, **negative results and self-corrections are published**.
 
 ## Data & licensing
 

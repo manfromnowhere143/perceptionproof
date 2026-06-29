@@ -33,13 +33,13 @@ def main(path: str) -> None:
     g, ade, fde, logs = [], [], [], []
     for r in rows:
         trajs = [np.asarray(t, float) for t in r["trajs"]]
-        human = np.asarray(r["human"], float)
         outs = [ModelOutput(model_id=f"m{k}", weights_sha256="x",
                             trajectory_modes=[TrajectoryMode(waypoints=trajs[k], weight=1.0)]) for k in range(K)]
         g.append(s1_ensemble_disagreement(outs, sigma=sigma))
-        errs = [np.linalg.norm(trajs[k] - human, axis=1) for k in range(K)]
-        ade.append(float(np.mean(errs)))
-        fde.append(float(np.mean([e[-1] for e in errs])))
+        # ADE/FDE are precomputed derived scalars (mean displacement of each member vs the human
+        # future); the raw ground-truth trajectory is not redistributed. See DATA_LICENSES.md.
+        ade.append(float(r["ade"]))
+        fde.append(float(r["fde"]))
         logs.append(r["log"])
 
     g, ade, fde, logs = np.array(g), np.array(ade), np.array(fde), np.array(logs)

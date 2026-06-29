@@ -83,6 +83,12 @@ def main(path):
                          ("off_road->DAC", c["offroad"], dac), ("disagreement->DAC", c["disag"], dac)]:
         a, lo, hi = auroc_ci(sig, tgt, logs)
         print(f"  {nm:22s} AUROC={a:.3f} CI[{lo:.3f},{hi:.3f}]")
+    anyg = (c["pdms"] <= 1e-9).astype(int)  # PDMS=0 <=> any multiplicative gate failed
+    print(f"\nany-gate (PDMS=0): events={int(anyg.sum())}")
+    for nm, sig in [("disagreement->any", c["disag"]), ("collision_risk->any", c["crisk"]),
+                    ("off_road->any", c["offroad"])]:
+        a, lo, hi = auroc_ci(sig, anyg, logs)
+        print(f"  {nm:22s} AUROC={a:.3f} CI[{lo:.3f},{hi:.3f}]")
     print("\nCLEAN VERDICT (paired AUROC difference, bootstrap by drive):")
     for nm, a, b, tgt in [("collision_risk - disagreement -> NC", c["crisk"], c["disag"], nc),
                           ("off_road - disagreement -> DAC", c["offroad"], c["disag"], dac)]:
@@ -92,4 +98,4 @@ def main(path):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "pp_p2c.json")
+    main(sys.argv[1] if len(sys.argv) > 1 else "pp_p2c_scaled.json")

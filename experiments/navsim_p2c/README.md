@@ -36,6 +36,20 @@ python analyze.py ~/pp_p2c.json
 - `off_road` — fraction of ego **footprint** corners outside the drivable area (aligned with DAC).
 - `disagreement` — ensemble trajectory spread (S1), the displacement baseline.
 
+## Reproduce from committed data (no dataset needed)
+
+The scored outputs are committed — the gate-event verdict and the P2d TransFuser run verify offline:
+
+```bash
+python analyze.py pp_p2c_scaled.json          # NC/DAC gates AUROC 0.77-0.83; paired diffs inconclusive
+python leave_one_out_nc.py pp_p2c_scaled.json # NC AUROC 0.821 [0.775,0.865] (independent outcome)
+python analyze.py tf_mini_result.json         # P2d TransFuser: 3 collisions / 12 off-road (underpowered)
+```
+
+`pp_p2c_scaled.json` (1,317 scenes) and `tf_mini_result.json` (396 scenes, real TransFuser) hold
+only **derived** data: segment ids, our predicted trajectories, and the simulator-computed gate
+metrics (NC, DAC, PDMS, TTC, EP, collision-geometry). No ground-truth trajectory or media.
+
 ## Engineering notes
 
 - Scoring is parallelized (one PDM simulation per core); the giant scene-index is freed before

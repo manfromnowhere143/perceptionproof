@@ -35,11 +35,11 @@ def main(path: str) -> None:
     g, err, logs = [], [], []
     for r in rows:
         trajs = [np.asarray(t, float) for t in r["trajs"]]
-        human = np.asarray(r["human"], float)
         subset = [ModelOutput(model_id=f"m{k}", weights_sha256="x",
                               trajectory_modes=[TrajectoryMode(waypoints=trajs[k], weight=1.0)]) for k in range(sub)]
         g.append(s1_ensemble_disagreement(subset, sigma=sigma))
-        err.append(float(np.linalg.norm(trajs[K - 1] - human, axis=1).mean()))
+        # outcome = open-loop error of the held-out member (precomputed derived scalar)
+        err.append(float(r["member_ade"][K - 1]))
         logs.append(r["log"])
 
     g, err, logs = np.array(g), np.array(err), np.array(logs)

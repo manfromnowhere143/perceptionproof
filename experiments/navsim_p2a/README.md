@@ -41,8 +41,18 @@ python analyze.py ~/pp_result.json
 | `train_ensemble.py` | K ego-status MLPs, by-log split, dumps trajectories + human future to JSON |
 | `analyze.py` | computes S1 disagreement + ADE + correlation via `perceptionproof.signals`/`scoring` |
 
+## Reproduce from committed data (no dataset needed)
+
+The scored output is committed, so the figures verify offline against the tested statistics:
+
+```bash
+python analyze.py pp_result.json          # rho=0.699 [0.599,0.750], AUROC 0.855, E-AURC 0.180
+python leave_one_out.py pp_result.json    # rho=0.683 [0.589,0.729] (independent held-out outcome)
+```
+
 ## Honesty / data
 
-No OpenScene/nuPlan media or labels are committed — only code. The raw per-scene trajectory dump
-is OpenScene-derived and is not redistributed (see `../../DATA_LICENSES.md`); only the aggregate
-numbers in the report are published.
+`pp_result.json` holds only **derived** data: segment ids, our ensemble's predicted trajectories,
+and precomputed per-member ADE/FDE scalars. The OpenScene/nuPlan **ground-truth future is not
+committed** (ADE was computed against it on-device, then reduced to scalars); no media or labels
+are redistributed. See `../../DATA_LICENSES.md`.

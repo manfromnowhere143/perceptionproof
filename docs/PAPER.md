@@ -213,9 +213,9 @@ it, the binary safety events.
 ### 5.4 T3 with a real sensor planner: underpowered (P2d)
 
 To test the gates with a real perception planner we ran a 3-seed pretrained **TransFuser**
-(camera + LiDAR) end-to-end through the PDM simulator: 396 scenes, 47 drives, 0 errors. The
+(camera + LiDAR) end-to-end through the PDM simulator: 396 scenes, 52 drives, 0 errors. The
 pipeline is validated, but the result is **underpowered, not refuted** — a strong planner almost
-never fails (3 collisions, 10 off-road events on 396 scenes), too few to estimate a
+never fails (3 collisions, 12 off-road events on 396 scenes), too few to estimate a
 failure-prediction AUROC; only the broad any-gate target is borderline (disagreement AUROC
 0.600 [0.514, 0.697]). A powered real-sensor measurement needs a much larger frame-consistent
 sensor dataset. We report this honestly rather than overstate a small-sample number.
@@ -336,14 +336,19 @@ the natural alternative, and is outside the cheap-signal framing this paper test
 
 ## 8. Reproducibility and Provenance
 
-Signals, validity statistics, and the receipt chain are unit-tested (33 tests). Each experiment
-ships its reproduction scripts under `experiments/`, its report under `results/`, and its
-derived scalars (never frames). A synthetic end-to-end run exercises the full pipeline with no
-data or GPU and verifies the Ed25519 receipt chain. The four-target arc is reproduced by:
-P2a–d under `experiments/navsim_p2a/`, `navsim_p2b/`, `navsim_p2c/`; the WOD-E2E human-rating
-arc (P2e–h) under `experiments/wod_e2e_rfs/`. Pre-registered hypotheses and thresholds are
-frozen in `PREREGISTRATION.md`. Datasets are under non-commercial research licenses; this work
-redistributes none of their frames.
+Signals, validity statistics, and the receipt chain are unit-tested (33 tests). **Every headline
+number in this paper regenerates from committed derived data** — the scored per-scene outputs
+(segment ids, predicted trajectories, gate flags, RFS values; no frames) are committed next to
+each analysis, and the unit-tested statistics recompute the reported figures with no dataset
+download and no GPU. For example, `python experiments/navsim_p2c/analyze.py
+experiments/navsim_p2c/pp_p2c_scaled.json` reproduces the gate-event AUROCs and the paired-null
+verdict; `python experiments/wod_e2e_rfs/analyze_p2h.py` reproduces the jointly-trained-vision
+result. The full data-acquisition and scoring pipelines (which are dataset-bound) ship alongside,
+under each `experiments/<name>/` (setup, data, train, score). A synthetic end-to-end run
+exercises the full harness with no data or GPU and verifies the Ed25519 receipt chain.
+Pre-registered hypotheses and thresholds are frozen in `PREREGISTRATION.md`. Datasets are under
+non-commercial research licenses; this work redistributes none of their frames — only segment ids
+and our derived outputs.
 
 ---
 
