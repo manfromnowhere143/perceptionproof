@@ -66,6 +66,33 @@ events* — exactly where an evaluation layer needs to work — and, against hum
 stay weak (ρ ≈ 0.18), with frozen-encoder perception grounding giving **no robust lift**
 once you average over seeds instead of trusting one draw.
 
+### The complete picture (Phase 1 + Phase 2)
+
+Phase 2 then attacked the human-rating gap with *supervision* (not just label-free signals) and
+hit a second wall. Triangulated across four targets and both regimes, the whole study lands on one
+clean, two-sided thesis:
+
+```mermaid
+flowchart TB
+  Q["Can a cheap signal substitute for<br/>simulation / human raters?"]
+  Q --> BIN["binary SAFETY BOUNDARY<br/>collision · off-road gates"]
+  Q --> QUAL["graded SCENE-INTERACTIVE QUALITY<br/>closed-loop score · human ratings"]
+  BIN --> W["<b>YES — recoverable cheaply</b><br/>open-loop error ρ = 0.70<br/>safety gates AUROC ≈ 0.8"]
+  QUAL --> N1["<b>NO — label-free</b><br/>closed-loop score ρ ≈ 0<br/>human RFS ρ ≈ 0.18 (ceiling)"]
+  QUAL --> N2["<b>NO — supervised</b><br/>RFS prediction: data-walled (2A)<br/>closed-loop PDMS-rank: no-go vs open-loop (2B)"]
+  classDef q fill:#eef1f5,stroke:#33415c,color:#0f172a;
+  classDef win fill:#e2f3e5,stroke:#2e7d32,color:#13361b;
+  classDef null fill:#fdebec,stroke:#c62828,color:#3b1213;
+  class Q q;
+  class BIN,W win;
+  class QUAL,N1,N2 null;
+```
+
+Cheap evaluation recovers the **binary safety boundary** an evaluation layer most needs, and —
+by ceiling (label-free) and by data wall + no-go (supervised) — provably does **not** substitute
+for simulation or human raters on **graded, scene-interactive quality**. A characterization, not a
+leaderboard win, with a mechanism for each side. Full write-up: [`docs/PAPER.md`](docs/PAPER.md).
+
 ## Pre-registered hypotheses
 
 | | Claim | Confirmed if |
